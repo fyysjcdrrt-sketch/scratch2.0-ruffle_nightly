@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ruffle test</title>
+</head>
+<body>
+  <h1>Ruffle test</h1>
+  <div id="player"></div>
+  <p>Place a SWF named <strong>scratch.swf</strong> next to this file, then open this page via HTTP.</p>
+  <script src="ruffle.js"></script>
+  <script>
+    (function() {
+      const ruffle = window.RufflePlayer?.newest();
+      if (!ruffle) {
+        document.getElementById('player').innerText = 'ruffle.js not found or failed to load.';
+        return;
+      }
+      const player = ruffle.createPlayer();
+      document.getElementById('player').appendChild(player);
+      player.load('scratch.swf');
+    })();
+  </script>
+</body>
+</html>
