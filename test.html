@@ -3,24 +3,81 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ruffle test</title>
+  <title>Scratch 2.0 Emulator</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #222; color: #fff; padding: 20px; }
+    #player { margin: 20px auto; display: none; }
+    #drop-zone {
+      border: 3px dashed #4a90e2;
+      padding: 30px;
+      width: 80%;
+      max-width: 500px;
+      margin: 20px auto;
+      background: #333;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>Ruffle test</h1>
+  <h1>Scratch 2.0 Emulator (Ruffle)</h1>
+  
+  <!-- Zona unde utilizatorii pot trage fișierul lor .sb2 -->
+  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+    <p>Drag & drop your <strong>.sb2</strong> file here, or click to choose one</p>
+    <input type="file" id="file-input" accept=".sb2" style="display:none;" onchange="handleFileSelect(this.files)">
+  </div>
+
   <div id="player"></div>
-  <p>Place a SWF named <strong>scratch.swf</strong> next to this file, then open this page via HTTP.</p>
+
   <script src="ruffle.js"></script>
   <script>
-    (function() {
+    let rufflePlayer = null;
+
+    // Funcția care preia fișierul încărcat de utilizator
+    function handleFileSelect(files) {
+      const file = files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const projectDataUrl = e.target.result;
+        launchScratch(projectDataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Funcția care pornește Ruffle cu fișierul tău SWF din 2010 și proiectul injectat
+    function launchScratch(projectUrl) {
       const ruffle = window.RufflePlayer?.newest();
       if (!ruffle) {
         document.getElementById('player').innerText = 'ruffle.js not found or failed to load.';
+        document.getElementById('player').style.display = 'block';
         return;
       }
-      const player = ruffle.createPlayer();
-      document.getElementById('player').appendChild(player);
-      player.load('scratch.swf');
-    })();
+
+      const container = document.getElementById('player');
+      container.innerHTML = ''; // Ștergem jocul vechi dacă exista unul
+      container.style.display = 'block';
+
+      rufflePlayer = ruffle.createPlayer();
+      container.appendChild(rufflePlayer);
+
+      // Încarcă fișierul tău exact și îi trimite proiectul ales de utilizator
+      rufflePlayer.load({
+        url: 'Scratchv20100804.swf',
+        parameters: {
+          project: projectUrl
+        }
+      });
+    }
+
+    // Configurare pentru Drag & Drop direct în pagină
+    const dropZone = document.getElementById('drop-zone');
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+    });
+    dropZone.addEventListener('drop', e => { handleFileSelect(e.dataTransfer.files); }, false);
   </script>
 </body>
 </html>
